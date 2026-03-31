@@ -1,13 +1,14 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-// Anthropic loaded dynamically below
-
 import compression from 'compression';
+import { readFileSync, existsSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
 const app = express();
 app.use(cors());
-app.use(compression()); // gzip all responses
+app.use(compression());
 app.use(express.json({ limit: '5mb' }));
 
 const PORT = process.env.PORT || 3001;
@@ -15,9 +16,24 @@ const HUBSPOT_TOKEN = process.env.HUBSPOT_TOKEN;
 const ATTENTION_API_KEY = process.env.ATTENTION_API_KEY;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
-let anthropic = null; try { const Anthropic = (await import('@anthropic-ai/sdk')).default; if (ANTHROPIC_API_KEY && ANTHROPIC_API_KEY !== 'your_key_here') anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY }); } catch(e) { console.warn('Anthropic SDK not available'); }
-  ? new Anthropic({ apiKey: ANTHROPIC_API_KEY })
-  : null;
+// Load Anthropic dynamically so the server doesn't crash if the SDK or key is missing
+let anthropic = null;
+try {
+  if (ANTHROPIC_API_KEY && ANTHROPIC_API_KEY !== 'your_key_here') {
+    const { default: Anthropic } = await import('@anthropic-ai/sdk');
+    anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
+    console.log('  ✅ Anthropic SDK loaded');
+  } else {
+    console.warn('  ⚠️ No Anthropic API key — brief/reengage features disabled');
+  }
+} catch (e) {
+  console.warn('  ⚠️ Anthropic SDK not available:', e.message);
+}
+
+// ── File paths ──
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const CALLS_DATA_PATH = join(__dirname, '..', 'data', 'calls.json');
 
 // ── In-memory cache ──
 let cache = {
@@ -28,8 +44,6 @@ let cache = {
   lastRefresh: null,
 };
 
-// Fetch lock — prevents duplicate long-running fetches when multiple
-// requests hit the server while calls are still loading
 let callsFetchPromise = null;
 
 // ── HubSpot helpers ──
@@ -56,7 +70,6 @@ async function fetchAllCompanies() {
     'hs_parent_company_id', 'notes_last_updated', 'hs_ideal_customer_profile',
     'hs_num_child_companies', 'annualrevenue', 'num_associated_deals',
     'hs_num_open_deals', 'crm_dropdown',
-    // Additional location fields for robust state resolution
     'states_dropdown', 'hs_state_code', 'territory_region', 'address',
   ];
 
@@ -95,7 +108,6 @@ async function fetchAllDeals() {
     'dealname', 'dealstage', 'amount', 'closedate', 'createdate',
     'hs_deal_stage_probability', 'hs_lastmodifieddate', 'hs_mrr', 'hs_acv',
     'hubspot_owner_id',
-    // Stage history — used to determine if a deal ever reached SQL for close rate calc
     'hs_v2_date_entered_1041142962',
   ];
 
@@ -151,15 +163,6 @@ async function attentionFetch(path, params = {}) {
   return res.json();
 }
 
-// Load cached calls from data file if available
-import { readFileSync, existsSync } from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const CALLS_DATA_PATH = join(__dirname, '..', 'data', 'calls.json');
-
 function loadCachedCalls() {
   try {
     if (existsSync(CALLS_DATA_PATH)) {
@@ -178,7 +181,6 @@ app.use(express.static(join(__dirname, '..', 'dist')));
 
 // ── Routes ──
 
-// GET /api/companies
 app.get('/api/companies', async (req, res) => {
   try {
     if (req.query.refresh === 'true' || !cache.companies) {
@@ -192,7 +194,6 @@ app.get('/api/companies', async (req, res) => {
   }
 });
 
-// GET /api/deals
 app.get('/api/deals', async (req, res) => {
   try {
     if (req.query.refresh === 'true' || !cache.deals) {
@@ -206,14 +207,12 @@ app.get('/api/deals', async (req, res) => {
   }
 });
 
-// ── Team email whitelist — only keep calls from these reps ──
 const TEAM_EMAILS = new Set([
   'parker@avoca.ai',
   'corbin@avoca.ai',
   'brian@avoca.ai',
 ]);
 
-// Slim a raw Attention call object down to only the fields the frontend uses.
 function slimCall(raw) {
   const a = raw.attributes || raw;
   const id = raw.id || a.uuid;
@@ -239,7 +238,6 @@ function slimCall(raw) {
   };
 }
 
-// Core fetch function for all Attention calls (shared via lock)
 async function fetchAllCalls() {
   let allCalls = [];
   let page = 1;
@@ -267,7 +265,6 @@ async function fetchAllCalls() {
 
   console.log(`  ✅ Loaded ${allCalls.length} calls from Attention API (all history)`);
 
-  // Persist to disk so next cold start is instant
   try {
     const { writeFileSync } = await import('fs');
     writeFileSync(CALLS_DATA_PATH, JSON.stringify(allCalls));
@@ -279,7 +276,6 @@ async function fetchAllCalls() {
   return allCalls;
 }
 
-// Lighten call objects for the browser (strip fields only used for pull/storage)
 function lightCall(c) {
   return {
     id: c.id,
@@ -295,18 +291,14 @@ function lightCall(c) {
     dealUUID: c.dealUUID,
     userUUID: c.userUUID,
     userEmail: c.userEmail,
-    // Drop: participants, attendees, externalOpportunity (saves ~70% payload)
   };
 }
 
-// GET /api/calls — returns cached calls only (from memory or disk).
-// Filtered to team members only. Use /api/calls/pull to refresh from Attention.
 app.get('/api/calls', async (req, res) => {
   try {
     if (!cache.calls) {
       cache.calls = loadCachedCalls();
     }
-    // Filter to team + lighten for browser
     const teamCalls = cache.calls
       .filter(c => c.userEmail && TEAM_EMAILS.has(c.userEmail.toLowerCase()))
       .map(lightCall);
@@ -317,14 +309,11 @@ app.get('/api/calls', async (req, res) => {
   }
 });
 
-// POST /api/calls/pull — on-demand full pull from Attention API.
-// Streams progress via SSE so the frontend can show a progress bar.
 app.get('/api/calls/pull', async (req, res) => {
   if (!ATTENTION_CONFIGURED) {
     return res.status(503).json({ error: 'Attention API key not configured.' });
   }
 
-  // SSE headers for streaming progress
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
@@ -333,7 +322,6 @@ app.get('/api/calls/pull', async (req, res) => {
   const send = (data) => res.write(`data: ${JSON.stringify(data)}\n\n`);
 
   try {
-    // If already in progress, attach to existing fetch
     if (callsFetchPromise) {
       send({ status: 'progress', message: 'Fetch already in progress, waiting...' });
       cache.calls = await callsFetchPromise;
@@ -342,7 +330,6 @@ app.get('/api/calls/pull', async (req, res) => {
       return res.end();
     }
 
-    // Start fresh fetch — last 90 days, filter to team only
     callsFetchPromise = (async () => {
       let allCalls = [];
       let page = 1;
@@ -366,7 +353,6 @@ app.get('/api/calls/pull', async (req, res) => {
         totalRecords = data.meta?.totalRecords || totalRecords;
         const pageCount = data.meta?.pageCount || 1;
 
-        // Stream progress every 25 pages
         if (page % 25 === 0 || page === 1) {
           send({ status: 'progress', loaded: allCalls.length, total: totalRecords, page, pageCount });
         }
@@ -375,7 +361,6 @@ app.get('/api/calls/pull', async (req, res) => {
         page++;
       }
 
-      // Persist to disk
       try {
         const { writeFileSync } = await import('fs');
         writeFileSync(CALLS_DATA_PATH, JSON.stringify(allCalls));
@@ -399,11 +384,9 @@ app.get('/api/calls/pull', async (req, res) => {
   res.end();
 });
 
-// GET /api/calls/:dealId — Attention calls linked to a deal
 app.get('/api/calls/:dealId', async (req, res) => {
   try {
     if (!ATTENTION_CONFIGURED) {
-      // Fall back to cached calls filtered by dealId
       const cached = loadCachedCalls();
       const filtered = cached.filter(c => (c.deal_ids || []).includes(req.params.dealId));
       return res.json({ calls: filtered });
@@ -412,7 +395,6 @@ app.get('/api/calls/:dealId', async (req, res) => {
       page: 1,
       size: 50,
     });
-    // Filter by deal association from response
     const calls = (data.data || []).filter(c => {
       const dealIds = c.externalIdentifiers?.dealIds || c.deal_ids || [];
       return dealIds.includes(req.params.dealId);
@@ -424,7 +406,6 @@ app.get('/api/calls/:dealId', async (req, res) => {
   }
 });
 
-// GET /api/call/:callId — full call details
 app.get('/api/call/:callId', async (req, res) => {
   try {
     const data = await attentionFetch(`/v2/conversations/${req.params.callId}`);
@@ -435,7 +416,6 @@ app.get('/api/call/:callId', async (req, res) => {
   }
 });
 
-// POST /api/brief — generate pre-call brief
 app.post('/api/brief', async (req, res) => {
   try {
     const { company, calls, deal } = req.body;
@@ -489,7 +469,6 @@ Generate a pre-call brief with these sections:
   }
 });
 
-// POST /api/reengage — generate re-engagement email
 app.post('/api/reengage', async (req, res) => {
   try {
     const { company, lastCallDaysAgo, objection, nextStep } = req.body;
@@ -515,14 +494,12 @@ app.post('/api/reengage', async (req, res) => {
   }
 });
 
-// POST /api/ask-calls — ask Attention AI about calls
 app.post('/api/ask-calls', async (req, res) => {
   try {
     const { dealId, prompt } = req.body;
     if (!ATTENTION_CONFIGURED) {
       return res.status(503).json({ error: 'Attention API key not configured.' });
     }
-    // v2 may not have an ask endpoint — return structured call data instead
     const data = await attentionFetch('/v2/conversations', {
       page: 1,
       size: 20,
@@ -534,7 +511,6 @@ app.post('/api/ask-calls', async (req, res) => {
   }
 });
 
-// GET /api/owners — fetch all HubSpot owners
 app.get('/api/owners', async (req, res) => {
   try {
     if (cache.owners && !req.query.refresh) {
@@ -567,7 +543,6 @@ app.get('/api/owners', async (req, res) => {
   }
 });
 
-// GET /api/refresh — invalidate cache and refetch
 app.get('/api/refresh', async (req, res) => {
   try {
     const [companies, deals] = await Promise.all([
@@ -576,7 +551,7 @@ app.get('/api/refresh', async (req, res) => {
     ]);
     cache.companies = companies;
     cache.deals = deals;
-    cache.calls = null; // will lazy-load
+    cache.calls = null;
     cache.lastRefresh = new Date().toISOString();
     res.json({ success: true, lastRefresh: cache.lastRefresh });
   } catch (err) {
