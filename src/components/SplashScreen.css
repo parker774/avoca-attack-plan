@@ -1,0 +1,475 @@
+/* ── Splash Screen ── */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #0d1117;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* ── Night Sky ── */
+.splash-sky {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    #0d1117 0%,
+    #161b22 40%,
+    #1a1510 70%,
+    #2a1a0a 100%
+  );
+  opacity: 0;
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+/* Stars */
+.splash-stars {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  animation: fadeIn 1s 0.3s ease-out forwards;
+}
+
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: #fff;
+  border-radius: 50%;
+  animation: twinkle var(--dur) var(--delay) ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* ── Desert Ground ── */
+.splash-ground {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30%;
+  background: linear-gradient(180deg, #2a1a0a 0%, #1a1008 100%);
+  opacity: 0;
+  animation: fadeIn 0.8s 0.2s ease-out forwards;
+}
+
+.splash-ground::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #3d2a14 20%, #5a3d1e 50%, #3d2a14 80%, transparent);
+}
+
+/* Cacti silhouettes */
+.cactus {
+  position: absolute;
+  bottom: 0;
+  opacity: 0;
+  animation: fadeIn 0.8s 0.4s ease-out forwards;
+}
+
+.cactus-1 {
+  left: 8%;
+  width: 20px;
+  height: 80px;
+  background: #0d0d0d;
+  border-radius: 8px 8px 0 0;
+}
+.cactus-1::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: -12px;
+  width: 12px;
+  height: 35px;
+  background: #0d0d0d;
+  border-radius: 8px 0 0 0;
+}
+.cactus-1::after {
+  content: '';
+  position: absolute;
+  top: 30px;
+  right: -10px;
+  width: 10px;
+  height: 25px;
+  background: #0d0d0d;
+  border-radius: 0 8px 0 0;
+}
+
+.cactus-2 {
+  right: 12%;
+  width: 16px;
+  height: 60px;
+  background: #0d0d0d;
+  border-radius: 6px 6px 0 0;
+}
+.cactus-2::before {
+  content: '';
+  position: absolute;
+  top: 15px;
+  right: -10px;
+  width: 10px;
+  height: 28px;
+  background: #0d0d0d;
+  border-radius: 0 6px 0 0;
+}
+
+/* ── Gunslinger Silhouettes ── */
+.gunslinger {
+  position: absolute;
+  bottom: 30%;
+  width: 80px;
+  height: 180px;
+  opacity: 0;
+}
+
+.gunslinger-left {
+  left: 15%;
+  animation: slideInLeft 0.7s 0.5s ease-out forwards;
+}
+
+.gunslinger-right {
+  right: 15%;
+  animation: slideInRight 0.7s 0.5s ease-out forwards;
+  transform: scaleX(-1);
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-80px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(80px) scaleX(-1); }
+  to { opacity: 1; transform: translateX(0) scaleX(-1); }
+}
+
+/* Gunslinger body parts */
+.gs-hat {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 20px;
+  background: #111;
+  border-radius: 50%;
+}
+.gs-hat::before {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 18px;
+  background: #111;
+  border-radius: 8px 8px 0 0;
+}
+
+.gs-head {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 24px;
+  background: #111;
+  border-radius: 50%;
+}
+
+.gs-body {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 60px;
+  background: #111;
+  border-radius: 4px;
+  /* Duster coat effect */
+  clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%);
+}
+
+.gs-duster {
+  position: absolute;
+  top: 55px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 50px;
+  background: #111;
+  clip-path: polygon(5% 0%, 95% 0%, 100% 100%, 0% 100%);
+}
+
+.gs-legs {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 80px;
+}
+.gs-legs::before,
+.gs-legs::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  width: 12px;
+  height: 75px;
+  background: #111;
+}
+.gs-legs::before { left: 1px; }
+.gs-legs::after { right: 1px; }
+
+/* Gun arm — starts at hip, transitions to extended */
+.gs-arm {
+  position: absolute;
+  top: 48px;
+  right: -4px;
+  width: 30px;
+  height: 10px;
+  background: #111;
+  border-radius: 0 4px 4px 0;
+  transform-origin: left center;
+  transform: rotate(50deg);
+  transition: transform 0.15s ease-out;
+}
+
+.gs-arm.drawn {
+  transform: rotate(0deg);
+  width: 40px;
+}
+
+.gs-arm::after {
+  content: '';
+  position: absolute;
+  right: -8px;
+  top: 1px;
+  width: 12px;
+  height: 8px;
+  background: #222;
+  border-radius: 2px;
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+
+.gs-arm.drawn::after {
+  opacity: 1;
+}
+
+/* ── Dust Particles ── */
+.dust-particle {
+  position: absolute;
+  bottom: 28%;
+  width: var(--size, 4px);
+  height: var(--size, 4px);
+  background: rgba(210, 153, 34, 0.3);
+  border-radius: 50%;
+  opacity: 0;
+  animation: dustFloat var(--dur, 3s) var(--delay, 0s) ease-in-out infinite;
+}
+
+@keyframes dustFloat {
+  0% { opacity: 0; transform: translate(0, 0); }
+  20% { opacity: 0.6; }
+  100% { opacity: 0; transform: translate(var(--dx, 50px), var(--dy, -30px)); }
+}
+
+/* ── Tumbleweed ── */
+.tumbleweed {
+  position: absolute;
+  bottom: 28%;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid #3d2a14;
+  opacity: 0;
+  animation: tumble 4s 1s ease-in-out forwards;
+}
+
+@keyframes tumble {
+  0% { left: -40px; opacity: 0; transform: rotate(0deg); }
+  10% { opacity: 0.5; }
+  90% { opacity: 0.3; }
+  100% { left: 110%; opacity: 0; transform: rotate(720deg); }
+}
+
+/* ── Gunflash ── */
+.gunflash {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0%, #ffd700 30%, #ff8c00 60%, transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gunflash.fire {
+  animation: gunflashBurst 0.4s ease-out forwards;
+}
+
+@keyframes gunflashBurst {
+  0% { width: 0; height: 0; opacity: 1; }
+  30% { width: 600px; height: 600px; opacity: 0.9; }
+  60% { width: 1200px; height: 1200px; opacity: 0.4; }
+  100% { width: 1800px; height: 1800px; opacity: 0; }
+}
+
+/* Screen shake */
+.splash.shaking {
+  animation: screenShake 0.4s ease-out;
+}
+
+@keyframes screenShake {
+  0% { transform: translate(0, 0); }
+  10% { transform: translate(-8px, 4px); }
+  20% { transform: translate(6px, -6px); }
+  30% { transform: translate(-4px, 2px); }
+  40% { transform: translate(4px, -2px); }
+  50% { transform: translate(-2px, 4px); }
+  60% { transform: translate(2px, -2px); }
+  70% { transform: translate(-2px, 0); }
+  80% { transform: translate(2px, 0); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ── American Flag (hero background) ── */
+.flag-wrapper {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
+  width: clamp(340px, 55vw, 700px);
+  opacity: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 0 60px rgba(178, 34, 52, 0.25))
+          drop-shadow(0 0 120px rgba(60, 59, 110, 0.2));
+}
+
+.flag-wrapper.visible {
+  animation: flagReveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.flag-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Flag waves subtly after reveal */
+.flag-wrapper.visible .flag-svg {
+  animation: flagWave 4s 1.2s ease-in-out infinite;
+}
+
+@keyframes flagReveal {
+  0%   { opacity: 0; transform: translate(-50%, -60%) scale(0.5); }
+  40%  { opacity: 0.35; }
+  100% { opacity: 0.18; transform: translate(-50%, -60%) scale(1); }
+}
+
+@keyframes flagWave {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.08); }
+}
+
+/* ── THE WILD WEST Title ── */
+.splash-title {
+  position: relative;
+  z-index: 10;
+  font-family: 'Rye', serif;
+  font-size: clamp(48px, 10vw, 110px);
+  color: #d29922;
+  text-shadow:
+    0 0 20px rgba(210, 153, 34, 0.6),
+    0 0 60px rgba(210, 153, 34, 0.3),
+    0 0 100px rgba(210, 153, 34, 0.15),
+    0 2px 0 #8a6415,
+    0 4px 0 #6b4e10;
+  letter-spacing: 0.12em;
+  opacity: 0;
+  transform: scale(0.3);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.splash-title.revealed {
+  animation: titleReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes titleReveal {
+  0% { opacity: 0; transform: scale(0.3); }
+  50% { opacity: 1; }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Subtitle */
+.splash-subtitle {
+  position: relative;
+  z-index: 10;
+  font-family: 'Rye', serif;
+  font-size: 14px;
+  color: rgba(210, 153, 34, 0.6);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  margin-top: 12px;
+  opacity: 0;
+}
+
+.splash-subtitle.visible {
+  animation: fadeIn 0.8s 0.3s ease-out forwards;
+}
+
+/* CTA */
+.splash-cta {
+  position: relative;
+  z-index: 10;
+  font-family: 'Rye', serif;
+  font-size: 16px;
+  color: rgba(210, 153, 34, 0.5);
+  margin-top: 40px;
+  opacity: 0;
+  letter-spacing: 0.2em;
+}
+
+.splash-cta.visible {
+  animation: ctaPulse 2s ease-in-out infinite;
+}
+
+@keyframes ctaPulse {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+  100% { opacity: 0.3; }
+}
+
+/* ── Fade out transition ── */
+.splash.exiting {
+  animation: splashExit 0.6s ease-in forwards;
+}
+
+@keyframes splashExit {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

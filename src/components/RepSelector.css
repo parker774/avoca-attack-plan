@@ -1,0 +1,314 @@
+/* ── Rep Selector ── */
+.rep-selector {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0d1117 0%, #161b22 40%, #1a1510 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  overflow-y: auto;
+}
+
+.rep-selector-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.rep-selector-title {
+  font-family: 'Rye', serif;
+  font-size: clamp(28px, 5vw, 48px);
+  color: #d29922;
+  text-shadow:
+    0 0 15px rgba(210, 153, 34, 0.4),
+    0 2px 0 #8a6415;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.rep-selector-subtitle {
+  font-size: 14px;
+  color: var(--text-muted, #8b949e);
+  letter-spacing: 0.05em;
+}
+
+/* ── Team Preset Buttons ── */
+.rep-presets {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+  max-width: 960px;
+  margin-bottom: 24px;
+}
+
+.rep-preset-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 10px;
+  border: 2px solid rgba(210, 153, 34, 0.25);
+  background: rgba(210, 153, 34, 0.06);
+  color: #d29922;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: 'Rye', serif;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.rep-preset-btn:hover {
+  background: rgba(210, 153, 34, 0.14);
+  border-color: rgba(210, 153, 34, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(210, 153, 34, 0.15);
+}
+
+.rep-preset-btn.active {
+  background: rgba(210, 153, 34, 0.18);
+  border-color: #d29922;
+  box-shadow: 0 0 24px rgba(210, 153, 34, 0.2);
+}
+
+.rep-preset-emoji {
+  font-size: 18px;
+}
+
+.rep-preset-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  background: rgba(210, 153, 34, 0.2);
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+
+/* ── Search + controls bar ── */
+.rep-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 960px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.rep-search {
+  flex: 1;
+  min-width: 200px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(210, 153, 34, 0.2);
+  border-radius: 8px;
+  padding: 10px 16px;
+  color: var(--text, #e6edf3);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.rep-search:focus {
+  border-color: rgba(210, 153, 34, 0.5);
+}
+
+.rep-search::placeholder {
+  color: rgba(139, 148, 158, 0.6);
+}
+
+.rep-btn-ghost {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(210, 153, 34, 0.2);
+  border-radius: 8px;
+  padding: 10px 16px;
+  color: #d29922;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.rep-btn-ghost:hover {
+  background: rgba(210, 153, 34, 0.1);
+  border-color: rgba(210, 153, 34, 0.4);
+}
+
+.rep-selected-count {
+  font-size: 13px;
+  color: #d29922;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ── Rep Grid ── */
+.rep-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  width: 100%;
+  max-width: 960px;
+  margin-bottom: 40px;
+}
+
+/* ── Rep Card ── */
+.rep-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.rep-card:hover {
+  background: rgba(210, 153, 34, 0.06);
+  border-color: rgba(210, 153, 34, 0.25);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(210, 153, 34, 0.08);
+}
+
+.rep-card.selected {
+  background: rgba(210, 153, 34, 0.1);
+  border-color: #d29922;
+  box-shadow: 0 0 24px rgba(210, 153, 34, 0.15), 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.rep-card.selected::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  background: #d29922;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rep-card-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  font-size: 11px;
+}
+
+.rep-card.selected .rep-card-check {
+  background: #d29922;
+  border-color: #d29922;
+  color: #0d1117;
+}
+
+.rep-card-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2a1a0a, #3d2a14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #d29922;
+  margin-bottom: 10px;
+  border: 2px solid rgba(210, 153, 34, 0.15);
+}
+
+.rep-card.selected .rep-card-avatar {
+  border-color: rgba(210, 153, 34, 0.5);
+}
+
+.rep-card-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text, #e6edf3);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rep-card-email {
+  font-size: 11px;
+  color: var(--text-muted, #8b949e);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Ride Out Button ── */
+.ride-out-bar {
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+  background: linear-gradient(transparent, #0d1117 40%);
+}
+
+.ride-out-btn {
+  font-family: 'Rye', serif;
+  font-size: 20px;
+  letter-spacing: 0.15em;
+  color: #0d1117;
+  background: linear-gradient(180deg, #e8b030 0%, #d29922 50%, #a67918 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 16px 48px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow:
+    0 0 30px rgba(210, 153, 34, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+  text-transform: uppercase;
+  animation: btnGlow 2.5s ease-in-out infinite;
+}
+
+@keyframes btnGlow {
+  0%, 100% { box-shadow: 0 0 30px rgba(210, 153, 34, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3); }
+  50% { box-shadow: 0 0 50px rgba(210, 153, 34, 0.45), 0 4px 12px rgba(0, 0, 0, 0.3); }
+}
+
+.ride-out-btn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow:
+    0 0 60px rgba(210, 153, 34, 0.5),
+    0 8px 24px rgba(0, 0, 0, 0.4);
+  animation: none;
+}
+
+.ride-out-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Entrance animation ── */
+.rep-selector {
+  animation: repSelectorIn 0.5s ease-out;
+}
+
+@keyframes repSelectorIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.rep-card {
+  animation: cardIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
