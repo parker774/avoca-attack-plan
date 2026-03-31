@@ -10,6 +10,11 @@ app.use(cors());
 app.use(compression()); // gzip all responses
 app.use(express.json({ limit: '5mb' }));
 
+// Serve frontend build
+import { join as pathJoin } from "path";
+const __dir = new URL(".", import.meta.url).pathname;
+app.use(express.static(pathJoin(__dir, "..", "dist")));
+
 const PORT = process.env.PORT || 3001;
 const HUBSPOT_TOKEN = process.env.HUBSPOT_TOKEN;
 const ATTENTION_API_KEY = process.env.ATTENTION_API_KEY;
@@ -582,6 +587,11 @@ app.get('/api/refresh', async (req, res) => {
   }
 });
 
+
+// Catch-all: serve index.html for client-side routing
+app.get("*", (req, res) => {
+  res.sendFile(pathJoin(__dir, "..", "dist", "index.html"));
+});
 app.listen(PORT, () => {
   console.log(`🚀 Avoca Attack Plan API running on port ${PORT}`);
 });
