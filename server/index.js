@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import Anthropic from '@anthropic-ai/sdk';
+// Anthropic loaded dynamically below
 
 import compression from 'compression';
 
@@ -15,7 +15,7 @@ const HUBSPOT_TOKEN = process.env.HUBSPOT_TOKEN;
 const ATTENTION_API_KEY = process.env.ATTENTION_API_KEY;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
-const anthropic = ANTHROPIC_API_KEY && ANTHROPIC_API_KEY !== 'your_key_here'
+let anthropic = null; try { const Anthropic = (await import('@anthropic-ai/sdk')).default; if (ANTHROPIC_API_KEY && ANTHROPIC_API_KEY !== 'your_key_here') anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY }); } catch(e) { console.warn('Anthropic SDK not available'); }
   ? new Anthropic({ apiKey: ANTHROPIC_API_KEY })
   : null;
 
