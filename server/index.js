@@ -256,7 +256,7 @@ app.get('/api/refresh', async function(req, res) {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.get('*', function(req, res) {
+app.get('/{*path}', function(req, res) {, function(req, res) {
   res.sendFile(join(__dirname, '..', 'dist', 'index.html'));
 });
 
